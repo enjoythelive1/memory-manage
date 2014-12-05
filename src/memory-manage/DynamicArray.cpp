@@ -1,21 +1,21 @@
-#ifndef DINAMYCARRAY_CPP
-#define DINAMYCARRAY_CPP
+#ifndef DYNAMICARRAY_CPP
+#define DYNAMICARRAY_CPP
 
-#include "dinamycarray.h"
+#include "DynamicArray.h"
 #include "chrunk.h"
 
 namespace MemoryManage_Arrays
 {
 
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize>::DinamycArray(size_t size = chrunkSize):items(0)
+DynamicArray<T,chrunkSize>::DynamicArray(size_t size = chrunkSize):items(0)
 {
     setToSize(size);
 }
 
 // copy
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &other):items(0)
+DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &other):items(0)
 {
     setToSize(other.length());
 
@@ -26,7 +26,7 @@ DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &other):item
 #if __cplusplus == 201103L
 // move
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &&other):items(0)
+DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &&other):items(0)
 {
     items = other.items;
     setToSize(other.length());
@@ -35,7 +35,7 @@ DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &&other):ite
 
 // move
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize> DinamycArray<T,chrunkSize>::operator =(DinamycArray<T,chrunkSize> &&other)
+DynamicArray<T,chrunkSize> DynamicArray<T,chrunkSize>::operator =(DynamicArray<T,chrunkSize> &&other)
 {
     clear();
 
@@ -47,14 +47,14 @@ DinamycArray<T,chrunkSize> DinamycArray<T,chrunkSize>::operator =(DinamycArray<T
 #endif
 
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize>::~DinamycArray()
+DynamicArray<T,chrunkSize>::~DynamicArray()
 {
     clear();
 }
 
 // copy
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize> DinamycArray<T,chrunkSize>::operator =(DinamycArray<T,chrunkSize> &other)
+DynamicArray<T,chrunkSize> DynamicArray<T,chrunkSize>::operator =(DynamicArray<T,chrunkSize> &other)
 {
     clear();
 
@@ -65,7 +65,7 @@ DinamycArray<T,chrunkSize> DinamycArray<T,chrunkSize>::operator =(DinamycArray<T
 }
 
 template<class T, int chrunkSize>
-T &DinamycArray<T,chrunkSize>::operator [](size_t index)
+T &DynamicArray<T,chrunkSize>::operator [](size_t index)
 {
     if(index >= size)
         throw OUT_OF_INDEX_ERROR;
@@ -84,19 +84,19 @@ T &DinamycArray<T,chrunkSize>::operator [](size_t index)
 }
 
 template<class T, int chrunkSize>
-T DinamycArray<T,chrunkSize>::get(size_t index) const
+T DynamicArray<T,chrunkSize>::get(size_t index) const
 {
     return this[index];
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::set(size_t index, T value)
+void DynamicArray<T,chrunkSize>::set(size_t index, T value)
 {
     this[index] = value;
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::add(T item)
+void DynamicArray<T,chrunkSize>::add(T item)
 {
     size_t newIndex = size;
 
@@ -106,7 +106,7 @@ void DinamycArray<T,chrunkSize>::add(T item)
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::removeAt(size_t index)
+void DynamicArray<T,chrunkSize>::removeAt(size_t index)
 {
     if(index >= size)
         throw OUT_OF_INDEX_ERROR;
@@ -123,7 +123,7 @@ void DinamycArray<T,chrunkSize>::removeAt(size_t index)
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::insertAt(size_t index, T item)
+void DynamicArray<T,chrunkSize>::insertAt(size_t index, T item)
 {
     bool mustMove = index < size;
 
@@ -138,13 +138,13 @@ void DinamycArray<T,chrunkSize>::insertAt(size_t index, T item)
 }
 
 template<class T, int chrunkSize>
-size_t DinamycArray<T,chrunkSize>::length() const
+size_t DynamicArray<T,chrunkSize>::length() const
 {
     return size;
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::setToSize(size_t newSize)
+void DynamicArray<T,chrunkSize>::setToSize(size_t newSize)
 {
     if(newSize && size < newSize)
     {
@@ -173,7 +173,7 @@ void DinamycArray<T,chrunkSize>::setToSize(size_t newSize)
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::clear()
+void DynamicArray<T,chrunkSize>::clear()
 {
 
     Chrunk<T,chrunkSize> *next = 0;
@@ -189,7 +189,7 @@ void DinamycArray<T,chrunkSize>::clear()
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::shrink()
+void DynamicArray<T,chrunkSize>::shrink()
 {
 
     unsigned deleteFrom = size / chrunkSize - 1;
@@ -213,24 +213,24 @@ void DinamycArray<T,chrunkSize>::shrink()
 }
 
 template<class T, int chrunkSize>
-void orderedInsert(DinamycArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
+void orderedInsert(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
 
 }
 
 template<class T, int chrunkSize>
-size_t orderedIndexOf(DinamycArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
+size_t orderedIndexOf(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
     return 0;
 }
 
 template<class T, int chrunkSize>
-void orderedRemove(DinamycArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
+void orderedRemove(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
 
 }
 
 template<class T, int chrunkSize>
-void sort(DinamycArray<T, chrunkSize> list, signed char (*comparer)(T &item1, T &item2)){
+void sort(DynamicArray<T, chrunkSize> list, signed char (*comparer)(T &item1, T &item2)){
 
 }
 
 }
-#endif // DINAMYCARRAY_CPP
+#endif // DYNAMICARRAY_CPP
