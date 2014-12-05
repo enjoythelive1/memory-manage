@@ -3,11 +3,13 @@
 
 #include <cstdlib>
 
+namespace MemoryManage_Arrays{
+
 template<class T, size_t size>
 class Chrunk
 {
-    Chrunk *nextChrunk = 0;
-    Chrunk *prevChrunk = 0;
+    Chrunk *nextChrunk;
+    Chrunk *prevChrunk;
 
     T items[size];
 public:
@@ -32,6 +34,8 @@ public:
         this->prevChrunk = item;
     }
 };
+
+}
 
 #include "chrunk.cpp"
 

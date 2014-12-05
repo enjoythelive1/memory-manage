@@ -2,6 +2,7 @@
 #define CHRUNK_CPP
 
 #include "chrunk.h"
+namespace MemoryManage_Arrays{
 
 template<class T, size_t size>
 Chrunk<T, size>::Chrunk(Chrunk * prev = 0, Chrunk * next = 0):
@@ -9,10 +10,11 @@ Chrunk<T, size>::Chrunk(Chrunk * prev = 0, Chrunk * next = 0):
 {
 }
 
-
-inline T &Chrunk::operator [](size_t index)
+template<class T, size_t size>
+inline T &Chrunk<T, size>::operator [](size_t index)
 {
     return this->items[index];
 }
 
+}
 #endif
