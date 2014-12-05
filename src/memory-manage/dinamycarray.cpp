@@ -4,33 +4,21 @@
 #include "dinamycarray.h"
 #include "chrunk.h"
 
+namespace MemoryManage_Arrays
+{
 
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize>::DinamycArray(size_t size = chrunkSize): size(size)
+DinamycArray<T,chrunkSize>::DinamycArray(size_t size = chrunkSize):items(0)
 {
-    int chrunks = size / chrunkSize + 1;
-
-    Chrunk<T,chrunkSize> *elemets = this->items = new Chrunk<T,chrunkSize>();
-
-    for(unsigned i = 0; i < chrunks - 1; i++) {
-        elemets->next(new Chrunk<T,chrunkSize>(elements));
-        elemets = elemets->next();
-    }
+    setToSize(size);
 }
 
 // copy
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &other):size(other.length())
+DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &other):items(0)
 {
-    int chrunks = size / chrunkSize + 1;
+    setToSize(other.length());
 
-    Chrunk<T,chrunkSize> *elemets = this->items = new Chrunk<T,chrunkSize>();
-
-    for(unsigned i = 0; i < chrunks - 1; i++) {
-        elemets->next(new Chrunk<T,chrunkSize>(elements));
-        elemets = elemets->next();
-    }
-    
     for(size_t i = 0; i < other.length(); i++)
         set(i, other.get(i));
 }
@@ -38,9 +26,10 @@ DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &other):size
 #if __cplusplus == 201103L
 // move
 template<class T, int chrunkSize>
-DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &&other):size(other.length())
+DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &&other):items(0)
 {
     items = other.items;
+    setToSize(other.length());
     other.items = 0;
 }
 
@@ -48,13 +37,10 @@ DinamycArray<T,chrunkSize>::DinamycArray(DinamycArray<T,chrunkSize> &&other):siz
 template<class T, int chrunkSize>
 DinamycArray<T,chrunkSize> DinamycArray<T,chrunkSize>::operator =(DinamycArray<T,chrunkSize> &&other)
 {
-    Chrunk<T,chrunkSize> *next = 0;
-    while(next = item.next()) {
-        delete items;
-        items = next;
-    }
+    clear();
 
     items = other.items;
+    setToSize(other.length());
     other.items = 0;
 }
 
@@ -63,33 +49,16 @@ DinamycArray<T,chrunkSize> DinamycArray<T,chrunkSize>::operator =(DinamycArray<T
 template<class T, int chrunkSize>
 DinamycArray<T,chrunkSize>::~DinamycArray()
 {
-    Chrunk<T,chrunkSize> *next = 0;
-    while(next = item.next()) {
-        delete items;
-        items = next;
-    }
+    clear();
 }
 
 // copy
 template<class T, int chrunkSize>
 DinamycArray<T,chrunkSize> DinamycArray<T,chrunkSize>::operator =(DinamycArray<T,chrunkSize> &other)
 {
-    Chrunk<T,chrunkSize> *next = 0;
-    while(next = item.next()) {
-        delete items;
-        items = next;
-    }
+    clear();
 
-    size = other.length();
-
-    int chrunks = size / chrunkSize + 1;
-
-    Chrunk<T,chrunkSize> *elemets = this->items = new Chrunk<T,chrunkSize>();
-
-    for(unsigned i = 0; i < chrunks - 1; i++) {
-        elemets->next(new Chrunk<T,chrunkSize>(elements));
-        elemets = elemets->next();
-    }
+    setToSize(other.length());
 
     for(size_t i = 0; i < other.length(); i++)
         set(i, other.get(i));
@@ -106,7 +75,8 @@ T &DinamycArray<T,chrunkSize>::operator [](size_t index)
 
     Chrunk<T,chrunkSize> toCheck = items;
 
-    for(unsigned i = 0; i < chrunkIndex; i++){
+    for(unsigned i = 0; i < chrunkIndex; i++)
+    {
         toCheck = toCheck.next();
     }
 
@@ -126,25 +96,141 @@ void DinamycArray<T,chrunkSize>::set(size_t index, T value)
 }
 
 template<class T, int chrunkSize>
-void DinamycArray<T,chrunkSize>::add(size_t index)
+void DinamycArray<T,chrunkSize>::add(T item)
 {
+    size_t newIndex = size;
+
+    setToSize(newIndex + 1);
+
+    set(newIndex, item);
 }
 
 template<class T, int chrunkSize>
 void DinamycArray<T,chrunkSize>::removeAt(size_t index)
 {
+    if(index >= size)
+        throw OUT_OF_INDEX_ERROR;
+
+    if (index == size - 1)
+    {
+        size--;
+    }
+    else
+    {
+        set(index, get(++index));
+        removeAt(index);
+    }
 }
 
 template<class T, int chrunkSize>
 void DinamycArray<T,chrunkSize>::insertAt(size_t index, T item)
 {
+    bool mustMove = index < size;
+
+    this->setToSize(index + 1);
+
+    T cvalue = this->get(index);
+
+    this->set(index, item);
+
+    if (mustMove)                   // this way the tail-recursion can be optimized by compiler
+        insertAt(index+1, cvalue);
 }
 
 template<class T, int chrunkSize>
-size_t DinamycArray<T,chrunkSize>::length()
+size_t DinamycArray<T,chrunkSize>::length() const
 {
+    return size;
+}
+
+template<class T, int chrunkSize>
+void DinamycArray<T,chrunkSize>::setToSize(size_t newSize)
+{
+    if(newSize && size < newSize)
+    {
+        if(!items)
+            items = new Chrunk<T,chrunkSize>();
+
+        unsigned chrunks = newSize / chrunkSize;
+
+        if(newSize % chrunkSize)
+            chrunks++;
+
+        size = newSize;
+        csize = chrunks * chrunkSize;
+
+        Chrunk<T, chrunkSize> *cchrnk = items;
+        for(unsigned i = 0; i < chrunks - 1; i++)
+        {
+            if(!cchrnk->next())
+            {
+                cchrnk.next(new Chrunk<T, chrunkSize>(cchrnk));
+            }
+
+            cchrnk = cchrnk->next();
+        }
+    }
+}
+
+template<class T, int chrunkSize>
+void DinamycArray<T,chrunkSize>::clear()
+{
+
+    Chrunk<T,chrunkSize> *next = 0;
+
+    while(items && next = items.next())
+    {
+        delete items;
+        items = next;
+    }
+
+    size = 0;
+    csize = 0;
+}
+
+template<class T, int chrunkSize>
+void DinamycArray<T,chrunkSize>::shrink()
+{
+
+    unsigned deleteFrom = size / chrunkSize - 1;
+    if (size % chrunkSize)
+    {
+        deleteFrom++;
+    }
+
+    Chrunk<T, chrunkSize> *toDelete = items;
+    for (unsigned i = 0; i < deleteFrom && toDelete; i++)
+        toDelete = toDelete.next();
+
+    Chrunk<T,chrunkSize> *next = 0;
+    while(toDelete && next = toDelete.next())
+    {
+        delete toDelete;
+        toDelete = next;
+    }
+
+    csize = (deleteFrom + 1) * chrunkSize;
+}
+
+template<class T, int chrunkSize>
+void orderedInsert(DinamycArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
 
 }
 
+template<class T, int chrunkSize>
+size_t orderedIndexOf(DinamycArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
+    return 0;
+}
 
+template<class T, int chrunkSize>
+void orderedRemove(DinamycArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2)){
+
+}
+
+template<class T, int chrunkSize>
+void sort(DinamycArray<T, chrunkSize> list, signed char (*comparer)(T &item1, T &item2)){
+
+}
+
+}
 #endif // DINAMYCARRAY_CPP
