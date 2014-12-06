@@ -34,3 +34,4 @@ src/build-memory-manage-Desktop-Debug
 src/build-memory-manage-Desktop-Release
 
 *.workspace*
+*.layout*
