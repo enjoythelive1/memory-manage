@@ -11,6 +11,9 @@
 namespace MemoryManage_Arrays{
 #define OUT_OF_INDEX_ERROR 99999
 
+template<class T>
+signed char defaultComparer(T &item1, T &item2);
+
 template<class T, int chrunkSize = 100>
 class DynamicArray
 {
@@ -36,22 +39,29 @@ public:
     T& DLL_EXPORT operator[](size_t index);
 
     T DLL_EXPORT get(size_t index) const;
-    void DLL_EXPORT set(size_t index, T value);
+    void DLL_EXPORT set(size_t index, T &value);
 
     void DLL_EXPORT add(T item);
     void DLL_EXPORT removeAt(size_t index);
-    void DLL_EXPORT insertAt(size_t index, T item);
+    void DLL_EXPORT insertAt(size_t index, T &item);
 
     void DLL_EXPORT clear();
     void DLL_EXPORT shrink();
 
+    bool DLL_EXPORT equal(DynamicArray &other, signed char (*comp)(T &item1, T &item2));
+    bool DLL_EXPORT equal(T *other, size_t length, signed char (*comp)(T &item1, T &item2));
+
+    bool DLL_EXPORT operator == (DynamicArray &other) {
+        return equal(other);
+    }
+
     size_t DLL_EXPORT length() const;
 
-    friend void orderedInsert(DynamicArray list, T item, signed char (*comparer)(T &item1, T &item2));
+    friend void orderedInsert(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2));
 
-    friend size_t orderedIndexOf(DynamicArray list, T item, signed char (*comparer)(T &item1, T &item2));
+    friend int orderedIndexOf(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2));
 
-    friend void orderedRemove(DynamicArray list, T item, signed char (*comparer)(T &item1, T &item2));
+    friend void orderedRemove(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2));
 
     friend void sort(DynamicArray &list, signed char (*comparer)(T &item1, T &item2));
 };
