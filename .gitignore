@@ -32,3 +32,5 @@ src/memory-manage/obj
 src/memory-manage/bin
 src/build-memory-manage-Desktop-Debug
 src/build-memory-manage-Desktop-Release
+
+*.workspace*
