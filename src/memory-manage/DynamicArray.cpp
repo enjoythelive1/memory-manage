@@ -8,14 +8,14 @@ namespace MemoryManage_Arrays
 {
 
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize>::DynamicArray(size_t size = chrunkSize):items(0)
+DynamicArray<T,chrunkSize>::DynamicArray(size_t size):items(0), size(0)
 {
     setToSize(size);
 }
 
 // copy
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &other):items(0)
+DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &other):items(0), size(0)
 {
     setToSize(other.length());
 
@@ -26,7 +26,7 @@ DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &other):item
 #if __cplusplus == 201103L
 // move
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &&other):items(0)
+DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &&other):items(0), size(0)
 {
     items = other.items;
     setToSize(other.length());
@@ -35,7 +35,7 @@ DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &&other):ite
 
 // move
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize> DLL_EXPORT DynamicArray<T,chrunkSize>::operator =(DynamicArray<T,chrunkSize> &&other)
+DynamicArray<T,chrunkSize>  DynamicArray<T,chrunkSize>::operator =(DynamicArray<T,chrunkSize> &&other)
 {
     clear();
 
@@ -54,7 +54,7 @@ DynamicArray<T,chrunkSize>::~DynamicArray()
 
 // copy
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize> DLL_EXPORT DynamicArray<T,chrunkSize>::operator =(DynamicArray<T,chrunkSize> &other)
+DynamicArray<T,chrunkSize> DynamicArray<T,chrunkSize>::operator =(DynamicArray<T,chrunkSize> &other)
 {
     clear();
 
@@ -65,13 +65,16 @@ DynamicArray<T,chrunkSize> DLL_EXPORT DynamicArray<T,chrunkSize>::operator =(Dyn
 }
 
 template<class T, int chrunkSize>
-T DLL_EXPORT &DynamicArray<T,chrunkSize>::operator [](size_t index)
+T &DynamicArray<T,chrunkSize>::operator [](size_t index)
 {
     if(index >= size)
         throw OUT_OF_INDEX_ERROR;
 
     unsigned chrunkIndex = index / chrunkSize;
     size_t chrunkItem = index % chrunkSize;
+
+    if(index > maxindex)
+        maxindex = index;
 
     Chrunk<T,chrunkSize> toCheck = items;
 
@@ -80,25 +83,25 @@ T DLL_EXPORT &DynamicArray<T,chrunkSize>::operator [](size_t index)
         toCheck = toCheck.next();
     }
 
-    return toCheck[chrunkItem];
+    return (*toCheck)[chrunkItem];
 }
 
 template<class T, int chrunkSize>
-T DLL_EXPORT DynamicArray<T,chrunkSize>::get(size_t index) const
+inline T DynamicArray<T,chrunkSize>::get(size_t index) const
 {
     return this[index];
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT DynamicArray<T,chrunkSize>::set(size_t index, T &value)
+inline void  DynamicArray<T,chrunkSize>::set(size_t index, T &value)
 {
     this[index] = value;
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT DynamicArray<T,chrunkSize>::add(T item)
+void  DynamicArray<T,chrunkSize>::add(T item)
 {
-    size_t newIndex = size;
+    size_t newIndex = maxindex + 1;
 
     setToSize(newIndex + 1);
 
@@ -106,7 +109,7 @@ void DLL_EXPORT DynamicArray<T,chrunkSize>::add(T item)
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT DynamicArray<T,chrunkSize>::removeAt(size_t index)
+void  DynamicArray<T,chrunkSize>::removeAt(size_t index)
 {
     if(index >= size)
         throw OUT_OF_INDEX_ERROR;
@@ -123,7 +126,7 @@ void DLL_EXPORT DynamicArray<T,chrunkSize>::removeAt(size_t index)
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT DynamicArray<T,chrunkSize>::insertAt(size_t index, T &item)
+void  DynamicArray<T,chrunkSize>::insertAt(size_t index, T &item)
 {
     bool mustMove = index < size;
 
@@ -138,12 +141,12 @@ void DLL_EXPORT DynamicArray<T,chrunkSize>::insertAt(size_t index, T &item)
 }
 
 template<class T, int chrunkSize>
-size_t DLL_EXPORT DynamicArray<T,chrunkSize>::length() const
+size_t  DynamicArray<T,chrunkSize>::length() const
 {
     return size;
 }
 template<class T, int chrunkSize>
-bool DLL_EXPORT DynamicArray<T,chrunkSize>::equal(DynamicArray<T,chrunkSize> &other, signed char (*comp)(T &item1, T &item2) = 0){
+bool  DynamicArray<T,chrunkSize>::equal(DynamicArray<T,chrunkSize> &other, signed char (*comp)(T &item1, T &item2)){
     if (length() != other.length()) return false;
 
     if(!comp)
@@ -158,7 +161,7 @@ bool DLL_EXPORT DynamicArray<T,chrunkSize>::equal(DynamicArray<T,chrunkSize> &ot
 }
 
 template<class T, int chrunkSize>
-bool DLL_EXPORT DynamicArray<T,chrunkSize>::equal(T *other, size_t length, signed char (*comp)(T &item1, T &item2) = 0){
+bool  DynamicArray<T,chrunkSize>::equal(T *other, size_t length, signed char (*comp)(T &item1, T &item2)){
     if (length > this->length()) return false;
 
     if(!comp)
@@ -173,7 +176,12 @@ bool DLL_EXPORT DynamicArray<T,chrunkSize>::equal(T *other, size_t length, signe
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT DynamicArray<T,chrunkSize>::setToSize(size_t newSize)
+bool  DynamicArray<T,chrunkSize>::operator == (DynamicArray &other) {
+        return equal(other);
+}
+
+template<class T, int chrunkSize>
+void  DynamicArray<T,chrunkSize>::setToSize(size_t newSize)
 {
     if(newSize && size < newSize)
     {
@@ -193,7 +201,7 @@ void DLL_EXPORT DynamicArray<T,chrunkSize>::setToSize(size_t newSize)
         {
             if(!cchrnk->next())
             {
-                cchrnk.next(new Chrunk<T, chrunkSize>(cchrnk));
+                cchrnk->next(new Chrunk<T, chrunkSize>(cchrnk));
             }
 
             cchrnk = cchrnk->next();
@@ -202,13 +210,14 @@ void DLL_EXPORT DynamicArray<T,chrunkSize>::setToSize(size_t newSize)
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT DynamicArray<T,chrunkSize>::clear()
+void  DynamicArray<T,chrunkSize>::clear()
 {
 
     Chrunk<T,chrunkSize> *next = 0;
 
-    while(items && next = items.next())
+    while(items)
     {
+        next = items->next();
         delete items;
         items = next;
     }
@@ -218,7 +227,7 @@ void DLL_EXPORT DynamicArray<T,chrunkSize>::clear()
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT DynamicArray<T,chrunkSize>::shrink()
+void  DynamicArray<T,chrunkSize>::shrink()
 {
 
     unsigned deleteFrom = size / chrunkSize - 1;
@@ -242,7 +251,7 @@ void DLL_EXPORT DynamicArray<T,chrunkSize>::shrink()
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT orderedInsert(DynamicArray<T, chrunkSize> &list, T &item, signed char (*comp)(T &item1, T &item2) = 0){
+void  orderedInsert(DynamicArray<T, chrunkSize> &list, T &item, signed char (*comp)(T &item1, T &item2)){
     if(!comp)
         comp = defaultComparer<T>;
 
@@ -268,7 +277,7 @@ void DLL_EXPORT orderedInsert(DynamicArray<T, chrunkSize> &list, T &item, signed
 }
 
 template<class T, int chrunkSize>
-int DLL_EXPORT orderedIndexOf(DynamicArray<T, chrunkSize> &list, T &item, signed char (*comp)(T &item1, T &item2) = 0){
+int  orderedIndexOf(DynamicArray<T, chrunkSize> &list, T &item, signed char (*comp)(T &item1, T &item2)){
     if(!comp)
         comp = defaultComparer<T>;
 
@@ -294,7 +303,7 @@ int DLL_EXPORT orderedIndexOf(DynamicArray<T, chrunkSize> &list, T &item, signed
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT orderedRemove(DynamicArray<T, chrunkSize> &list, T &item, signed char (*comp)(T &item1, T &item2) = 0){
+void  orderedRemove(DynamicArray<T, chrunkSize> &list, T &item, signed char (*comp)(T &item1, T &item2)){
     if(!comp)
         comp = defaultComparer<T>;
 
@@ -388,7 +397,7 @@ void insertionSort(DynamicArray<T, chrunkSize> &list, size_t start=0, size_t end
 }
 
 template<class T, int chrunkSize>
-void DLL_EXPORT sort(DynamicArray<T, chrunkSize> &list, signed char (*comp)(T &item1, T &item2) = 0){
+void  sort(DynamicArray<T, chrunkSize> &list, signed char (*comp)(T &item1, T &item2)){
     if(!comp)
         comp = defaultComparer<T>;
 

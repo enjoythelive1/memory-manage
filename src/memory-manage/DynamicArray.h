@@ -1,9 +1,9 @@
 #ifndef DYNAMICARRAY_H
 #define DYNAMICARRAY_H
 
-#ifndef DLL_EXPORT
-#define DLL_EXPORT
-#endif // DLL_EXPORT
+#ifndef
+#define
+#endif //
 
 #include <cstdlib>
 #include "chrunk.h"
@@ -19,67 +19,66 @@ class DynamicArray
 {
     size_t size;
     size_t csize;
+    size_t maxindex;
     Chrunk<T, chrunkSize> *items;
 
     void setToSize(size_t newSize);
 
 public:
-    DynamicArray(size_t size);
+    DynamicArray(size_t size = chrunkSize);
 
     DynamicArray(DynamicArray &other); //copy
-    DynamicArray DLL_EXPORT operator = (DynamicArray &other); //copy
+    DynamicArray  operator = (DynamicArray &other); //copy
 
 #if __cplusplus == 201103L
     DynamicArray(DynamicArray &&other); //move
-    DynamicArray DLL_EXPORT operator = (DynamicArray &&other); //move
+    DynamicArray  operator = (DynamicArray &&other); //move
 #endif
 
     ~DynamicArray();
 
-    T& DLL_EXPORT operator[](size_t index);
+    T&  operator[](size_t index);
 
-    T DLL_EXPORT get(size_t index) const;
-    void DLL_EXPORT set(size_t index, T &value);
+    T  get(size_t index) const;
+    void  set(size_t index, T &value);
 
-    void DLL_EXPORT add(T item);
-    void DLL_EXPORT removeAt(size_t index);
-    void DLL_EXPORT insertAt(size_t index, T &item);
+    void  add(T item);
+    void  removeAt(size_t index);
+    void  insertAt(size_t index, T &item);
 
-    void DLL_EXPORT clear();
-    void DLL_EXPORT shrink();
+    void  clear();
+    void  shrink();
 
-    bool DLL_EXPORT equal(DynamicArray &other, signed char (*comp)(T &item1, T &item2));
-    bool DLL_EXPORT equal(T *other, size_t length, signed char (*comp)(T &item1, T &item2));
+    bool  equal(DynamicArray &other, signed char (*comp)(T &item1, T &item2) = 0);
+    bool  equal(T *other, size_t length, signed char (*comp)(T &item1, T &item2) = 0);
 
-    bool DLL_EXPORT operator == (DynamicArray &other) {
-        return equal(other);
-    }
+    bool  operator == (DynamicArray &other);
 
-    size_t DLL_EXPORT length() const;
+    size_t  length() const;
 
-    friend void orderedInsert(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2));
+    friend void orderedInsert(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2) = 0);
 
-    friend int orderedIndexOf(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2));
+    friend int orderedIndexOf(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2) = 0);
 
-    friend void orderedRemove(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2));
+    friend void orderedRemove(DynamicArray &list, T &item, signed char (*comparer)(T &item1, T &item2) = 0);
 
-    friend void sort(DynamicArray &list, signed char (*comparer)(T &item1, T &item2));
+    friend void sort(DynamicArray &list, signed char (*comparer)(T &item1, T &item2) = 0);
 };
 
 template<class T, int chrunkSize>
-void DLL_EXPORT orderedInsert(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2));
+void  orderedInsert(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2) = 0);
 
 template<class T, int chrunkSize>
-size_t DLL_EXPORT orderedIndexOf(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2));
+size_t  orderedIndexOf(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2) = 0);
 
 template<class T, int chrunkSize>
-void DLL_EXPORT orderedRemove(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2));
+void  orderedRemove(DynamicArray<T, chrunkSize> list, T item, signed char (*comparer)(T &item1, T &item2) = 0);
 
 // must be used because a Dinamyc list
 template<class T, int chrunkSize>
-void DLL_EXPORT sort(DynamicArray<T, chrunkSize> list, signed char (*comparer)(T &item1, T &item2));
+void  sort(DynamicArray<T, chrunkSize> list, signed char (*comparer)(T &item1, T &item2) = 0);
 
 }
-#include "DynamicArray.h"
+#include "DynamicArray.cpp"
 
 #endif // DYNAMICARRAY_H
