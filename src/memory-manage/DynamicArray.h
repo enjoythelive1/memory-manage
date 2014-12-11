@@ -1,10 +1,6 @@
 #ifndef DYNAMICARRAY_H
 #define DYNAMICARRAY_H
 
-#ifndef
-#define
-#endif //
-
 #include <cstdlib>
 #include "chrunk.h"
 
