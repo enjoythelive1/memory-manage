@@ -8,14 +8,14 @@ namespace MemoryManage_Arrays
 {
 
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize>::DynamicArray(size_t size):items(0), size(0)
+DynamicArray<T,chrunkSize>::DynamicArray(size_t size):items(0), size(0), maxindex(0)
 {
     setToSize(size);
 }
 
 // copy
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &other):items(0), size(0)
+DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &other):items(0), size(0), maxindex(0)
 {
     setToSize(other.length());
 
@@ -26,7 +26,7 @@ DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &other):item
 #if __cplusplus == 201103L
 // move
 template<class T, int chrunkSize>
-DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &&other):items(0), size(0)
+DynamicArray<T,chrunkSize>::DynamicArray(DynamicArray<T,chrunkSize> &&other):items(0), size(0), maxindex(0)
 {
     items = other.items;
     setToSize(other.length());
@@ -76,11 +76,11 @@ T &DynamicArray<T,chrunkSize>::operator [](size_t index)
     if(index > maxindex)
         maxindex = index;
 
-    Chrunk<T,chrunkSize> toCheck = items;
+    Chrunk<T,chrunkSize> *toCheck = items;
 
     for(unsigned i = 0; i < chrunkIndex; i++)
     {
-        toCheck = toCheck.next();
+        toCheck = toCheck->next();
     }
 
     return (*toCheck)[chrunkItem];
